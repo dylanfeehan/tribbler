@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dylanfeehan/tribbler/rpc/tribrpc"
-	"github.com/dylanfeehan/tribbler/tribclient"
+	"github.com/dylanfeehan/tribbler/api/tribrpc"
+	"github.com/dylanfeehan/tribbler/pkg/tribclient"
 )
 
 var port = flag.Int("port", 9010, "TribServer port number")
@@ -47,7 +47,7 @@ func main() {
 		os.Exit(1)
 	}
 	cmd := flag.Arg(0)
-	client, err := tribclient.NewTribClient("localhost", *port)
+	handle, err := tribclient.NewTribHandle("localhost", *port)
 	if err != nil {
 		log.Fatalln("Failed to create TribClient:", err)
 	}
@@ -79,56 +79,57 @@ func main() {
 
 	switch cmd {
 	case "uc": // user create
-		status, err := client.CreateUser(flag.Arg(1))
+		status, err := handle.CreateUser(flag.Arg(1))
 		printStatus(ci.funcname, status, err)
 	case "sl": // subscription list
-		subs, status, err := client.GetSubscriptions(flag.Arg(1))
+		subs, status, err := handle.GetSubscriptions(flag.Arg(1))
 		printStatus(ci.funcname, status, err)
-		if err == nil && status == tribrpc.OK {
+		if err == nil && status == 0 {
 			fmt.Println(strings.Join(subs, " "))
 		}
 	case "sa":
-		status, err := client.AddSubscription(flag.Arg(1), flag.Arg(2))
+		status, err := handle.AddSubscription(flag.Arg(1), flag.Arg(2))
 		printStatus(ci.funcname, status, err)
 	case "sr": // subscription remove
-		status, err := client.RemoveSubscription(flag.Arg(1), flag.Arg(2))
+		status, err := handle.RemoveSubscription(flag.Arg(1), flag.Arg(2))
 		printStatus(ci.funcname, status, err)
 	case "tl": // tribble list
-		tribbles, status, err := client.GetTribbles(flag.Arg(1))
+		tribbles, status, err := handle.GetTribbles(flag.Arg(1))
 		printStatus(ci.funcname, status, err)
-		if err == nil && status == tribrpc.OK {
+		if err == nil && status == 0 {
 			printTribbles(tribbles)
 		}
 	case "ts": // tribbles by subscription
-		tribbles, status, err := client.GetTribblesBySubscription(flag.Arg(1))
+		tribbles, status, err := handle.GetTribblesBySubscription(flag.Arg(1))
 		printStatus(ci.funcname, status, err)
-		if err == nil && status == tribrpc.OK {
+		if err == nil && status == 0 {
 			printTribbles(tribbles)
 		}
 	case "tp": // tribble post
-		status, err := client.PostTribble(flag.Arg(1), flag.Arg(2))
+		status, err := handle.PostTribble(flag.Arg(1), flag.Arg(2))
 		printStatus(ci.funcname, status, err)
 	}
 }
 
-func tribStatusToString(status tribrpc.Status) (s string) {
+// should use enums instead?
+func tribStatusToString(status int) (s string) {
 	switch status {
-	case tribrpc.OK:
+	case 0:
 		s = "OK"
-	case tribrpc.NoSuchUser:
+	case 1:
 		s = "NoSuchUser"
-	case tribrpc.NoSuchTargetUser:
+	case 2:
 		s = "NoSuchTargetUser"
-	case tribrpc.Exists:
+	case 3:
 		s = "Exists"
 	}
 	return
 }
 
-func printStatus(cmdName string, status tribrpc.Status, err error) {
+func printStatus(cmdName string, status int, err error) {
 	if err != nil {
 		fmt.Println("ERROR:", cmdName, "got error:", err)
-	} else if status != tribrpc.OK {
+	} else if status != 0 {
 		fmt.Println(cmdName, "ERROR:", cmdName, "replied with status", tribStatusToString(status))
 	} else {
 		fmt.Println(cmdName, "OK")
@@ -136,11 +137,12 @@ func printStatus(cmdName string, status tribrpc.Status, err error) {
 }
 
 func printTribble(t tribrpc.Tribble) {
-	fmt.Printf("%16.16s - %s - %s\n", t.UserID, t.Posted.String(), t.Contents)
+	fmt.Printf("%16.16s - %s - %s\n", t.GetUserID(), string(t.GetPostedTime()), t.GetContents())
 }
 
-func printTribbles(tribbles []tribrpc.Tribble) {
+func printTribbles(tribbles []*tribrpc.Tribble) {
 	for _, t := range tribbles {
-		printTribble(t)
+		tribble := *t
+		printTribble(tribble)
 	}
 }

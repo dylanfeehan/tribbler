@@ -68,7 +68,7 @@ you can use the `go build` subcommand to compile an individual package as shown 
 go build path/to/tribserver
 
 # A different way to build/compile the "tribserver" package.
-go build github.com/dylanfeehan/tribbler/tribserver
+go build //github.com/dylanfeehan/tribbler/tribserver
 ```
 
 ##### How to Write Go Code

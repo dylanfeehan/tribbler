@@ -1,0 +1,61 @@
+option go_package = "github.com/dylanfeehan/tribbler/api/tribrpc";
+
+service Trib {
+    rpc CreateUser(CreateUserArgs) returns (CreateUserReply) {}
+    rpc AddSubscription(SubscriptionArgs) returns (SubscriptionReply) {}
+    rpc RemoveSubscription(SubscriptionArgs) returns (SubscriptionReply) {}
+    rpc GetSubscriptions(GetSubscriptionsArgs) returns (GetSubscriptionsReply) {}
+
+    rpc PostTribble(PostTribbleArgs) returns (PostTribbleReply) {}
+    rpc GetTribbles(GetTribblesArgs) returns (GetTribblesReply) {}
+    rpc GetTribblesBySubscription(GetTribblesArgs) returns (GetTribblesReply) {}
+}
+
+message CreateUserArgs {
+    required string UserID  = 1;
+}
+
+message CreateUserReply {
+    required int32 Status = 1;
+}
+
+message SubscriptionArgs {
+    required string UserID = 1;
+    required string TargetUserID = 2;
+}
+
+message SubscriptionReply {
+    required int32 Status = 1;
+}
+
+message GetSubscriptionsArgs {
+    required string UserID = 1;
+}
+
+message GetSubscriptionsReply {
+    required int32 Status = 1;
+    repeated string UserIDs = 2;
+}
+
+message PostTribbleArgs {
+    required string UserID = 1;
+    required string Contents = 2;
+}
+
+message PostTribbleReply {
+    required int32 Status = 1;
+}
+
+message GetTribblesArgs {
+    required string UserID = 1;
+}
+message GetTribblesReply {
+    required int32 Status = 1;
+    repeated Tribble Tribbles = 2;
+}
+
+message Tribble {
+    required string UserID = 1;   
+    required int64 PostedTime = 2;   
+    required string Contents = 3;   
+}
