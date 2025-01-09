@@ -11,10 +11,10 @@ on:
         description: 'Image Tag'
         required: true
         type: string
-      image_repository:
-        description: 'Image Repository'
-        required: true
-        type: string
+      #image_repository:
+        #description: 'Image Repository'
+        #required: true
+        #type: string
       image_name:
         description: 'Image Name'
         required: true
@@ -43,7 +43,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           tags: dylanfeehan/${{inputs.image_name}}:${{inputs.image_tag}}
-          context: ${{inputs.path_to_binary}}
+          #context: ${{inputs.path_to_binary}}
           push: true
           file: ./Dockerfile
+          build-args: MAIN_PATH=${{inputs.path_to_binary}}
 
