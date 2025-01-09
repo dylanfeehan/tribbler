@@ -13,7 +13,7 @@ ARG MAIN_PATH=./cmd/srunner
 # Copy the source code. Note the slash at the end, as explained in
 # https://docs.docker.com/reference/dockerfile/#copy
 COPY $MAIN_PATH/*.go ./
-COPY ./pkg .
+COPY . .
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux go build -o /run .
