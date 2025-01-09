@@ -40,7 +40,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          tags: dylanfeehan/${{inputs.image_name}}/:${{inputs.image_tag}}
+          tags: dylanfeehan/${{inputs.image_name}}:${{inputs.image_tag}}
           context: ${{inputs.path_to_binary}}
           push: true
 

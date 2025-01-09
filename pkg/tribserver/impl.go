@@ -1,38 +1,56 @@
 package tribserver
 
 import (
-	"log"
-	"net"
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/dylanfeehan/tribbler/api/tribrpc"
-	"google.golang.org/grpc"
 )
 
-type tribServer struct {
-	Tribs                           map[string]*tribrpc.Tribble
-	tribrpc.UnimplementedTribServer // struct embedding?
+func (ts tribServer) AddSubscription(cc context.Context, args *tribrpc.SubscriptionArgs) (*tribrpc.SubscriptionReply, error) {
+	return nil, nil
 }
 
-func newTribServerImpl() *tribServer {
-	s := &tribServer{
-		Tribs: map[string]*tribrpc.Tribble{},
-	}
-	return s
+func (ts tribServer) CreateUser(cc context.Context, args *tribrpc.CreateUserArgs) (*tribrpc.CreateUserReply, error) {
+	return nil, nil
 }
 
-func NewHandle(host, port string) {
-	address := net.JoinHostPort(host, port)
-	lis, err := net.Listen("tcp", address) // lis, Listener, is essentially a wrapper around a TCP socket.
-	if err != nil {
-		log.Fatalf("Failed to listen: %v\n", err)
+func (ts tribServer) GetSubscriptions(cc context.Context, args *tribrpc.GetSubscriptionsArgs) (*tribrpc.GetSubscriptionsReply, error) {
+	return nil, nil
+}
+
+func (ts tribServer) GetTribbles(cc context.Context, args *tribrpc.GetTribblesArgs) (*tribrpc.GetTribblesReply, error) {
+	reply := new(tribrpc.GetTribblesReply)
+	reply.Tribbles = ts.Tribs[*args.UserID]
+	var status int32 = 0
+	reply.Status = &status
+	return reply, nil
+}
+
+func (tribServer) GetTribblesBySubscription(cc context.Context, args *tribrpc.GetTribblesArgs) (*tribrpc.GetTribblesReply, error) {
+	return nil, nil
+}
+
+func (ts tribServer) PostTribble(cc context.Context, args *tribrpc.PostTribbleArgs) (*tribrpc.PostTribbleReply, error) {
+	now := time.Now().Unix()
+	fmt.Println(now)
+	tribble := &tribrpc.Tribble{
+		UserID:     args.UserID,
+		Contents:   args.Contents,
+		PostedTime: &now,
 	}
-	var serverOptions []grpc.ServerOption
-	serverOptions = append(serverOptions, grpc.ConnectionTimeout(120*time.Second))
 
-	grpcServer := grpc.NewServer(serverOptions...) // Server is an interface we can register grpc server implementations to
-	// tell the grpc server about our RPC implementation, register it
-	tribrpc.RegisterTribServer(grpcServer, newTribServerImpl()) // warpper around grpcServer.RegisterService(trib desc, trib impl)
+	userTribs := ts.Tribs[*args.UserID]
+	userTribs = append(userTribs, tribble)
+	ts.Tribs[*args.UserID] = userTribs
+	var status int32 = 0
+	reply := &tribrpc.PostTribbleReply{
+		Status: &status,
+	}
+	return reply, nil
+}
 
-	grpcServer.Serve(lis)
+func (ts tribServer) RemoveSubscription(cc context.Context, args *tribrpc.SubscriptionArgs) (*tribrpc.SubscriptionReply, error) {
+	return nil, nil
 }
